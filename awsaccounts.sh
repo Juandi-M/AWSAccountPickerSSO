@@ -66,7 +66,7 @@ echo
 check_and_install "jq" "jq"
 check_and_install "aws" "awscli"
 
-aws_sso_profiles=("Enterprise-Infrastructure" "NonProd-DataLake" "NonProd-Devops" "NonProd-EntInfrastructure" "NonProd-ITApp" "Prod-DevOps" "Prod-EntInfrastructure" "Prod-ITBusiness" "Sandbox-DevOps")
+aws_sso_profiles=("acc1" "acc2" "acc3" "acc4" "acc5" "acc6" "acc7" "acc8" "acc9")
 
 PS3="Select an AWS SSO profile to configure (enter the corresponding number): "
 select profile_name in "${aws_sso_profiles[@]}"; do
