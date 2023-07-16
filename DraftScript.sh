@@ -6,7 +6,7 @@ check_and_install() {
 
   if ! command -v "$tool" &> /dev/null; then
     echo "$tool is not installed."
-
+    
     if [[ $(uname -s) == "Darwin" ]]; then
       read -rp "Do you want to install $tool? (y/n): " answer
       if [[ $answer =~ [Yy] ]]; then
@@ -31,13 +31,14 @@ configure_aws_sso_profile() {
   local profile_name=$1
 
   echo "Configuring AWS SSO profile: $profile_name"
+  echo "-------------------------------------------"
 
   session_files=$(find ~/.aws/sso/cache/ -name "*.json")
   for session_file in $session_files; do
     expiry_time=$(jq -r '.expiresAt' "$session_file")
     current_time=$(date -u +"%Y-%m-%dT%H:%M:%S")
     if [[ "$expiry_time" > "$current_time" ]]; then
-      echo "SSO session is valid. No need to login again."
+      echo "SSO session is valid. No need to log in again."
       return
     fi
   done
@@ -45,15 +46,22 @@ configure_aws_sso_profile() {
   aws configure sso --profile "$profile_name"
 
   echo "Validating connection to $profile_name..."
+  echo "-------------------------------------------"
   if aws sso login --profile "$profile_name" >/dev/null 2>&1; then
     echo "Connection to '$profile_name' established."
   else
-    echo "Failed to establish connection to '$profile_name'. Please check your credentials and try again."
+    echo "Failed to establish a connection to '$profile_name'. Please check your credentials and try again."
     exit 1
   fi
+  echo "-------------------------------------------"
 }
-
+echo
+echo "-------------------------------------------"
+echo "-------------------------------------------"
 echo "AWS SSO Profile Configuration Script"
+echo "-------------------------------------------"
+echo "-------------------------------------------"
+echo
 
 check_and_install "jq" "jq"
 check_and_install "aws" "awscli"
@@ -66,12 +74,15 @@ select profile_name in "${aws_sso_profiles[@]}"; do
     break
   fi
   echo "Invalid selection. Please enter a number corresponding to the profile."
+  echo "-------------------------------------------"
 done
 
+echo "-------------------------------------------"
 configure_aws_sso_profile "$profile_name"
+echo "-------------------------------------------"
 
 # Define the shell profile file based on the current shell
-if [[ $SHELL == *"zsh"* ]]; then
+if [[ $SHELL ==a*"zsh"* ]]; then
   profile_file=~/.zshrc
 elif [[ $SHELL == *"bash"* ]]; then
   profile_file=~/.bashrc
@@ -80,6 +91,13 @@ else
   exit 1
 fi
 
+# Append a line to the shell profile file to set the AWS_PROFILE environment variable to the selected AWS SSO profile
 echo "export AWS_PROFILE=$profile_name" >> "$profile_file"
-echo "AWS SSO profile '$profile_name' is successfully configured and exported to the AWS_PROFILE environment variable."
-echo "This change will be permanent in new shell sessions. For the current shell session, please source the profile file: 'source $profile_file' or open a new terminal window."
+
+echo
+echo
+echo "******************************************************"
+echo "AWS SSO profile '$profile_name' is successfully configured and exported to the AWS_PROFILE environment variable"
+echo "********************************************************************************************************************************"
+echo "Execute 'source $profile_file' in your terminal for changes to take effect"
+echo "*************************************************************************************"
