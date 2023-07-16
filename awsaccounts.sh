@@ -1,25 +1,26 @@
-#!/bin/zsh
+#!/bin/bash
 
-# Function to connect to AWS accounts using AWS SSO
-connect_to_aws() {
-    aws_account_names=("Enterprise-Infrastructure" "NonProd-DataLake" "NonProd-Devops" "NonProd-EntInfrastructure" "NonProd-ITApp" "Prod-DevOps" "Prod-EntInfrastructure" "Prod-ITBusiness" "Sandbox-DevOps")
+# Function to configure an AWS SSO profile
+configure_aws_sso_profile() {
+    local profile_name=$1
 
-    # Prompt for selecting the AWS account
-    echo "Select an AWS account to connect:"
-    select account_name in "${aws_account_names[@]}"; do
-        break
-    done
+    echo "Configuring AWS SSO profile: $profile_name"
 
-    # Retrieve AWS SSO credentials for the selected account
-    aws sso login --profile "$account_name"
+    # Configure AWS SSO profile
+    aws configure sso --profile "$profile_name"
 
-    # Export the AWS configuration to environment variables
-    export AWS_PROFILE="$account_name"
-    export AWS_DEFAULT_REGION="us-west-2"  # Replace with your preferred default region
+    # Validate the connection
+    echo "Validating connection to $profile_name..."
+    if aws sso login --profile "$profile_name" >/dev/null 2>&1; then
+        echo "Connection to '$profile_name' established."
+    else
+        echo "Failed to establish connection to '$profile_name'. Please check your credentials and try again."
+        exit 1
+    fi
 }
 
 # Main script
-echo "AWS Account Connector Script"
+echo "AWS SSO Profile Configuration Script"
 
 # Check if AWS CLI is installed
 if ! command -v aws &> /dev/null; then
@@ -27,11 +28,16 @@ if ! command -v aws &> /dev/null; then
     exit 1
 fi
 
-# Check if AWS SSO is configured
-if ! aws configure get sso_start_url >/dev/null 2>&1; then
-    echo "AWS SSO is not configured. Please run 'aws configure sso' to set up AWS SSO before using this script."
-    exit 1
-fi
+# Array of AWS SSO profiles
+aws_sso_profiles=("Enterprise-Infrastructure" "NonProd-DataLake" "NonProd-Devops" "NonProd-EntInfrastructure" "NonProd-ITApp" "Prod-DevOps" "Prod-EntInfrastructure" "Prod-ITBusiness" "Sandbox-DevOps")
 
-# Connect to AWS accounts
-connect_to_aws
+# Prompt for selecting an AWS SSO profile
+PS3="Select an AWS SSO profile to configure (enter the corresponding number): "
+select profile_name in "${aws_sso_profiles[@]}"; do
+    break
+done
+
+# Configure the selected AWS SSO profile
+configure_aws_sso_profile "$profile_name"
+
+echo "AWS SSO profile '$profile_name' is successfully configured."
