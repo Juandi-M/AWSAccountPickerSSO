@@ -41,7 +41,7 @@ Select an AWS SSO profile to configure (enter the corresponding number):
 4) WS account 4
 5) AWS account 5
 6) AWS account 6
-7)AWS account 7
+7) AWS account 7
 8) AWS account 8
 9) AWS account 9
 ```
