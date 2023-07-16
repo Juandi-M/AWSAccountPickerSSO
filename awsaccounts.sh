@@ -34,10 +34,25 @@ aws_sso_profiles=("Enterprise-Infrastructure" "NonProd-DataLake" "NonProd-Devops
 # Prompt for selecting an AWS SSO profile
 PS3="Select an AWS SSO profile to configure (enter the corresponding number): "
 select profile_name in "${aws_sso_profiles[@]}"; do
-    break
+    if [[ $REPLY =~ ^[0-9]+$ ]]; then
+        if [[ $REPLY -gt 0 && $REPLY -le ${#aws_sso_profiles[@]} ]]; then
+            break
+        fi
+    fi
+    echo "Invalid selection. Please enter a number corresponding to the profile."
 done
 
 # Configure the selected AWS SSO profile
 configure_aws_sso_profile "$profile_name"
 
-echo "AWS SSO profile '$profile_name' is successfully configured."
+# Export the selected profile to AWS_PROFILE environment variable
+export AWS_PROFILE="$profile_name"
+
+echo "AWS SSO profile '$profile_name' is successfully configured and exported to the AWS_PROFILE environment variable."
+
+# Run AWS CLI command to test the configured profile
+if aws s3api list-buckets --query "Buckets[].Name" >/dev/null 2>&1; then
+    echo "Connected and tested successfully. You can now run AWS CLI commands directly in this terminal without switching configurations."
+else
+    echo "Failed to run the AWS CLI command. Please check your credentials and try again."
+fi
