@@ -16,13 +16,43 @@ check_tool_installation() {
         if ! command -v brew &> /dev/null; then
           handle_error "Homebrew is not installed. Please install Homebrew and try again."
         fi
-        echo "Installing $tool..."
+        echo "Installing $tool..." 
         brew install "$brew_package"
       else
         handle_error "Please install $tool before running this script."
       fi
     else
       handle_error "Please install $tool before running this script."
+    fi
+  fi
+}
+
+# Function to check if the AWS SSO configuration for a profile is valid
+is_aws_sso_config_valid() {
+  local profile_name=$1
+  local required_fields=("sso_start_url" "sso_region" "sso_account_id" "sso_role_name")
+  local missing_fields=()
+
+  # Check each required field
+  for field in "${required_fields[@]}"; do
+    local value=$(aws configure get "sso_$field" --profile "$profile_name")
+
+    # If the value is empty, add the field to the missing_fields array
+    if [[ -z $value ]]; then
+      missing_fields+=("$field")
+    fi
+  done
+
+  # If any required fields are missing, trigger the AWS configure sso or login process
+  if [[ ${#missing_fields[@]} -gt 0 ]]; then
+    echo "Incomplete AWS SSO configuration for '$profile_name'. Proceeding with SSO login process to complete configuration."
+    aws configure sso --profile "$profile_name"
+
+    echo "Validating connection to $profile_name..."
+    if aws sso login --profile "$profile_name" >/dev/null 2>&1; then
+      echo "Connection to '$profile_name' established."
+    else
+      handle_error "Failed to establish a connection to '$profile_name'. Please check your credentials and try again."
     fi
   fi
 }
@@ -36,6 +66,11 @@ configure_aws_sso_profile() {
   if is_sso_session_valid "$profile_name"; then
     echo "SSO session for $profile_name is valid. No need to log in again."
     return
+  fi
+
+  # Check if the AWS SSO configuration for the profile is valid
+  if ! is_aws_sso_config_valid "$profile_name"; then
+    echo "Incomplete AWS SSO configuration for '$profile_name'. Proceeding with SSO login process to complete configuration."
   fi
 
   # Configure SSO profile and validate connection
@@ -144,5 +179,4 @@ if [[ "${BASH_SOURCE[0]}" = "${0}" ]]; then
   echo "To apply the changes, please execute the following command:"
   echo "source $profile_file"
 else
-  echo "Changes have been applied. AWS_PROFILE environment variable is set to '$profile_name'."
-fi
+  echo "Changes have been applied. AWS_PROFILE environment

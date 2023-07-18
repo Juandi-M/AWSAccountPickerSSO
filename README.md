@@ -1,55 +1,84 @@
+# AWS SSO Profile Configuration Utility
+![Quality Assurance](http://ForTheBadge.com/images/badges/built-with-love.svg) ![Shell Script](https://img.shields.io/badge/Shell_Script-121011?style=for-the-badge&logo=gnu-bash&logoColor=white) ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
-# AWS SSO Profile Configuration Script
-![Effort](http://ForTheBadge.com/images/badges/built-with-love.svg) ![script](https://img.shields.io/badge/Shell_Script-121011?style=for-the-badge&logo=gnu-bash&logoColor=white) ![License](https://img.shields.io/badge/license-MIT-green.svg)
+Simplify your AWS Single Sign-On (SSO) profile configuration process with this effective shell script. A perfect solution for individual developers and teams managing multiple AWS accounts and frequently alternating between various SSO profiles.
 
+## Prerequisites
 
-This is a shell script that helps in configuring AWS Single Sign-On (SSO) profiles. It first checks for the required tools: `aws` and `jq`, offers to install them if they are not present, and then helps you in selecting and setting up your AWS SSO profile.
+Before launching this script, please ensure to install the following dependencies:
 
-## Dependencies
+- AWS CLI
+- jq
 
-- [AWS CLI](https://aws.amazon.com/cli/)
-- [jq](https://stedolan.github.io/jq/)
+Refer to their respective documentation for the installation process.
 
-## How it works
+## Installation Steps
 
-The script works as follows:
-
-1. It checks if the required tools (`jq` and `aws`) are installed.
-2. If not installed, it attempts to install them via Homebrew (macOS only). For other operating systems, it provides a prompt for manual installation.
-3. The script then allows you to select an AWS SSO profile.
-4. The AWS SSO session validity is then checked. If the session is expired, it attempts to re-login.
-5. It validates the connection to the AWS SSO profile, and if successful, sets it up.
-6. It then sets the chosen AWS SSO profile as the `AWS_PROFILE` environment variable in your shell profile.
-
-## Usage
-
-To run the script, clone this repository and execute the script with bash.
+1. Clone the repository to your local system:
 
 ```bash
 git clone https://github.com/YOUR_GITHUB_USERNAME/aws-sso-config.git
-cd aws-sso-config
-bash aws_sso_config.sh
 ```
 
-You'll then see a prompt to select an AWS SSO profile:
+2. Navigate into the cloned repository:
 
 ```bash
-Select an AWS SSO profile to configure (enter the corresponding number): 
-1) AWS account 1
-2) AWS account 2
-3) AWS account 3
-4) WS account 4
-5) AWS account 5
-6) AWS account 6
-7) AWS account 7
-8) AWS account 8
-9) AWS account 9
+cd aws-sso-config
 ```
 
-After selecting a profile, the script will attempt to validate and configure it. When it's done, it will update your shell profile with the `AWS_PROFILE` environment variable set to your chosen AWS SSO profile.
+3. Assign execution permission to the script:
 
-You'll then need to execute `source ~/.bashrc` or `source ~/.zshrc` depending on your shell for the changes to take effect.
+```bash
+chmod +x awsaccounts.sh
+```
 
-## License
+## Script Execution
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+For script execution, use bash or zsh:
+
+- Bash users:
+
+```bash
+bash awsaccounts.sh
+```
+
+- Zsh users:
+
+```bash
+zsh awsaccounts.sh
+```
+
+## Functionality
+
+Here's a rundown of how the script operates:
+
+1. Verifies the installation of the required tools (`jq` and `aws`), providing installation instructions if any are missing.
+2. Lists all available AWS SSO profiles and prompts you to select one.
+3. Validates the AWS SSO session related to the chosen profile, establishing a new session if the existing one has expired.
+4. Validates the connection to the selected AWS SSO profile and proceeds with its configuration.
+5. Sets the chosen AWS SSO profile as the `AWS_PROFILE` environment variable in your shell profile.
+
+The script auto-detects your shell (`bash` or `zsh`) and accordingly updates the `AWS_PROFILE` environment variable in the correct shell profile file.
+
+## Applying Configuration Changes
+
+Upon successful configuration of the AWS SSO profile and updating your shell profile, apply the changes to reflect them in your current shell session.
+
+For bash users, run the following command:
+
+```bash
+source ~/.bashrc
+```
+
+For zsh users, run the following command:
+
+```bash
+source ~/.zshrc
+```
+
+
+## Licensing
+This project operates under the Apache License 2.0. For more information, see the LICENSE.md file.
+
+### Note: 
+Please replace "YOUR_GITHUB_USERNAME" with your actual GitHub username in the repository cloning command.
